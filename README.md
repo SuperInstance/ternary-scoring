@@ -100,3 +100,11 @@ Consumes candidates that may be produced by `ternary-pipeline` (pipeline output 
 ## License
 
 MIT
+
+## See Also
+- **ternary-fitness** — related
+- **ternary-metrics** — related
+- **ternary-gauge** — related
+- **ternary-benchmark** — related
+- **ternary-pareto** — related
+
