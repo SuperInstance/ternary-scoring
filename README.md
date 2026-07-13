@@ -45,7 +45,9 @@ println!("{}", lb);
 // Pareto front: who is non-dominated?
 let pareto = ParetoScorer::new(vec![("speed", true), ("accuracy", true)]);
 let front = pareto.pareto_front(&candidates);
-println!("Pareto front: {:?}", front); // [0, 1] — conservative and aggressive
+println!("Pareto front: {:?}", front); // [0, 1, 2] — every candidate trades
+                                       //        speed for accuracy, so none
+                                       //        dominates another
 
 // Normalize scores to [0, 1]
 let normalizer = ScoreNormalizer::from_candidates(&candidates);
@@ -76,9 +78,9 @@ for c in &candidates {
 
 **Pareto analysis.** `ParetoScorer::dominates(a, b)` checks every objective: for maximize objectives, a must be ≥ b; for minimize, a must be ≤ b. At least one must be strictly better. `pareto_front` runs O(n²) comparisons: for each candidate, it checks if any other candidate dominates it. Non-dominated candidates form the front.
 
-**Normalization.** `ScoreNormalizer::from_candidates` scans all candidates to find the min and max of each criterion. `normalize` applies (value − min) / (max − min). If max = min (constant criterion), the normalized value is 0.0.
+**Normalization.** `ScoreNormalizer::from_candidates` unions every criterion that appears in any candidate (preserving first-seen order) and finds the min and max of each across all candidates that define it. `normalize` applies `(value − min) / (max − min)`. If `max == min` (constant criterion), the normalized value is `0.0`. Criteria not present in any training candidate are passed through unchanged.
 
-**Leaderboard.** `Leaderboard::from_scorer` scores all candidates, sorts descending by score, assigns ranks (1-indexed), and stores as `LeaderboardEntry` values. `winner()` returns the top entry. `rank_of(name)` looks up a specific candidate's rank.
+**Leaderboard.** `Leaderboard::from_scorer` scores all candidates, sorts descending by score (using `f64::total_cmp` so the order is total and panic-free; `NaN` scores are explicitly treated as worse than every real value and sort to the bottom), assigns ranks (1-indexed), and stores as `LeaderboardEntry` values. `winner()` returns the top entry. `rank_of(name)` looks up a specific candidate's rank.
 
 ## Known Limitations
 
